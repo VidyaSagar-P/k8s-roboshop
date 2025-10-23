@@ -1,70 +1,65 @@
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata: 
-  name: catalogue
+  name: rabbitmq
   namespace: roboshop
   labels:
-    component: catalogue
+    component: rabbitmq
     project: roboshop
-    tier: app
+    tier: database
+type: Opaque
 data:
-  MONGO: "true" 
-  MONGO_URL: "mongodb://mongodb:27017/catalogue"
+  RABBITMQ_DEFAULT_USER: "cm9ib3Nob3A="
+  RABBITMQ_DEFAULT_PASS: "cm9ib3Nob3AxMjM="
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
-  name: catalogue
+  name: rabbitmq
   namespace: roboshop
   # deployment labels
   labels:
-    component: catalogue
+    component: rabbitmq
     project: roboshop
-    tier: app
+    tier: database
 spec:
   replicas: 1
    # These are the labels replica set use to create pod replicas, this should match pod labels
   selector:
     matchLabels:
-      component: catalogue
+      component: rabbitmq
       project: roboshop
-      tier: app
+      tier: database
    # This is pod definition
   template: 
     metadata: 
       labels:
-        component: catalogue
+        component: rabbitmq
         project: roboshop
-        tier: app
+        tier: database
     spec: 
       containers:
-      - name: catalogue
-        image: vidya07422/catalogue:v1
+      - name: rabbitmq
+        image: rabbitmq:3
         envFrom:
-        - configMapRef:
-            name: catalogue
+        - secretRef:
+            name: rabbitmq
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: catalogue
+  name: rabbitmq
   namespace: roboshop
   labels:
-    component: catalogue
+    component: rabbitmq
     project: roboshop
-    tier: app
+    tier: database
 spec:
   selector:
-    component: catalogue
+    component: rabbitmq
     project: roboshop
-    tier: app
+    tier: database
   ports:
   - protocol: TCP
-    port: 8080  # service port
-    targetPort: 8080 # app/container port
-
-
-  
-
-    
-
+    port: 5672  # service port
+    targetPort: 5672 # database/container port
